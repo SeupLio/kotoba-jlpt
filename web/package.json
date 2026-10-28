@@ -1,7 +1,7 @@
 {
   "name": "kotoba-jlpt-web",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "JLPT N1-N5 词汇学习器（网页端）",
   "scripts": {

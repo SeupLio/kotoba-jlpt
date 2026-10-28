@@ -5,9 +5,8 @@
 > **本地路径**：`E:\hc\kotoba-jlpt`
 > **当前状态**：Web + Android 双端闭环；Web 通过类型检查、**70 项单测**、生产构建、Playwright 全流程与离线重载；
 > 本轮新增 **140 个原创语法点 / 15 篇阅读 / 30 道听力 / 限时 JLPT 模考**（原创题库，不含真题），
-> 已在浏览器实测语法练习、模考分部分提交、听力只播一次、交卷解析与历史成绩；Android debug APK 已重新构建并确认包含新题库，release APK 未重建；
-> Android 14（API 34）模拟器走通完整学习流程（撤销 / 结算 / 深色 / 断网重载 / 返回键 / 横屏，控制台零报错）；
-> 已用本地 keystore 签出 **v1.0.0 release APK（4.4 MB）**并发布到 GitHub Releases，debug APK 约 5.4 MB。
+> 已在浏览器实测语法练习、模考分部分提交、听力只播一次、交卷解析与历史成绩；Android 14（API 34）模拟器走通完整学习流程（撤销 / 结算 / 深色 / 断网重载 / 返回键 / 横屏，控制台零报错）；
+> 已用本地 keystore 签出 **v1.1.0 release APK（4.4 MB，versionCode 2）**并发布到 GitHub Releases，内含语法 / 阅读 / 听力题库；debug APK 约 5.4 MB。
 > 前一轮完成 README 用户化改版、品牌 Logo 与全端图标、词性补全与多义项、新词预习后移、沉浸式视觉与个性化设置；
 > 本轮新增语法训练与限时模考，并补充截图与文档。release 签名材料仅保存在本机，未入库。
 > **许可**：代码 MIT；`data/processed/` 与 `data/content/` 按 CC BY-SA 4.0
@@ -32,7 +31,7 @@
 | 中文释义补录 | 人工补录 1296 条 | `data/overrides/zh_glosses_1~5.json` | ✅ 已入库 |
 | 词库成品 | N5–N1 五个分级 JSON + 索引 | `data/processed/` | ✅ 括号配对 0 异常，已重建 |
 | Web 应用 | React 18 + TS + Vite + PWA | `web/` | ✅ 本轮已重建 |
-| Android 应用 | Capacitor 6 打包 | `web/android/` | ✅ v1.0.0 release APK 4.4 MB 已签名并发布；debug 5.4 MB 已用新题库重建；模拟器全流程通过，真机 TTS 未验证 |
+| Android 应用 | Capacitor 6 打包 | `web/android/` | ✅ v1.1.0 release APK 4.4 MB 已签名并发布（含新题库）；debug 5.4 MB；模拟器全流程通过，真机 TTS 未验证 |
 | 算法验证 | 蒙特卡洛模拟 + 参数敏感性 | `sim/` | ✅ 结论稳定（32 次重复） |
 | 单元测试 | **70 项**（srs / quiz / scheduler / pace / grammar / exam） | `web/src/core/*.test.ts` | ✅ 全部通过 |
 | 原创题库 | 语法 140 点、阅读 15 篇 / 25 题、听力 30 题 | `data/content/*.json` | ✅ 结构校验 + 全局 ID 唯一 |
@@ -256,8 +255,9 @@
   交卷解析与历史成绩回看。模考大堂题量文案按实际 37 题修正。
 - **截图**：`capture.mjs` 新增语法列表 / 语法练习 / 模考大堂 / 限时答题 / 桌面端语法与模考截图，
   README 已引用；本轮共生成 24 张 Web 截图（仓库合计 27 张，含 Android 实拍）。
-- **Android**：`npm run android:debug` 构建成功（5.4 MB），已确认 APK 的 `assets/public/data/content/`
-  包含语法、阅读、听力题库；release APK 与 GitHub Release 本轮未更新。
+- **Android**：`npm run android:debug` 构建成功（5.4 MB）；`npm run android:release` 签出 v1.1.0
+  release APK（4.4 MB，versionCode 2），已确认 `assets/public/data/content/` 包含语法、阅读、听力题库，
+  并发布到 GitHub Releases。
 
 ---
 
@@ -350,6 +350,8 @@ python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 - 构建：`cd web && npm run android:release`，产物为
   `web/android/app/build/outputs/apk/release/app-release.apk`。
 - v1.0.0 已发布：https://github.com/SeupLio/kotoba-jlpt/releases/tag/v1.0.0
+- v1.1.0 已发布：https://github.com/SeupLio/kotoba-jlpt/releases/tag/v1.1.0
+  （`kotoba-1.1.0.apk`，SHA-256 `b60ca573e60a22306dbb008446eabb62f4f3444eb2edb047c99230a541c2c919`）
 - 发布新版本时递增 `versionCode`（每次 +1）与 `versionName`，再打新 tag 并上传 APK；不要复用已发布的 tag。
 
 ---
@@ -428,7 +430,7 @@ python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 
 ## 七、给下一位接手者的建议顺序
 
-1. 先在自己的 Android 真机上装 v1.0.0 release APK，按第五章第 1 项做真机验证（模拟器已通过，重点听音频与键盘）；
+1. 先在自己的 Android 真机上装 v1.1.0 release APK，按第五章第 1 项做真机验证（模拟器已通过，重点听音频与键盘）；
 2. 用平板过一遍双列布局与横竖屏，确认长列表与触控目标；
 3. 先离线备份 `web/android/app/kotoba-release.keystore` 与 `web/android/keystore.properties`，再继续发版；
 4. CI 已在远端 `main` 生效：推送到 `main` 会自动跑三个 job，也可在 Actions 页面用 `workflow_dispatch` 手动重跑；

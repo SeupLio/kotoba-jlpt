@@ -276,11 +276,11 @@ N5、N4、N3、N2、N1 可以单选，也可以多选混排。选 N2 就只推 N
 
 项目包含完整的 Android 工程，界面、词库与学习记录与网页版一致。项目暂未上架应用商店。
 
-- [下载 Android APK v1.0.0](https://github.com/SeupLio/kotoba-jlpt/releases/latest/download/kotoba-1.0.0.apk)（约 4.4 MB）
-- [查看版本说明](https://github.com/SeupLio/kotoba-jlpt/releases/tag/v1.0.0)
+- [下载 Android APK v1.1.0](https://github.com/SeupLio/kotoba-jlpt/releases/latest/download/kotoba-1.1.0.apk)
+- [查看版本说明](https://github.com/SeupLio/kotoba-jlpt/releases/tag/v1.1.0)
 - 也可以按 [开发与交接说明](docs/HANDOVER.md) 自行构建
 
-> v1.0.0 APK 尚未包含本轮新增的语法训练与模考；最新 Web 代码已同步进 debug 包，正式 release 将在下个版本发布。
+> v1.1.0 已包含语法训练与限时模考，与最新 Web 版功能一致。
 
 ### 第一次打开
 
