@@ -1,0 +1,35 @@
+{
+  "levels": [
+    {
+      "level": "N5",
+      "count": 674,
+      "withZh": 674,
+      "file": "n5.json"
+    },
+    {
+      "level": "N4",
+      "count": 630,
+      "withZh": 630,
+      "file": "n4.json"
+    },
+    {
+      "level": "N3",
+      "count": 1659,
+      "withZh": 1659,
+      "file": "n3.json"
+    },
+    {
+      "level": "N2",
+      "count": 1778,
+      "withZh": 1778,
+      "file": "n2.json"
+    },
+    {
+      "level": "N1",
+      "count": 3070,
+      "withZh": 3070,
+      "file": "n1.json"
+    }
+  ],
+  "generatedAt": "2026-10-27T16:20:49.635115+00:00"
+}

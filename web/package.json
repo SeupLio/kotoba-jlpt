@@ -1,0 +1,41 @@
+{
+  "name": "kotoba-jlpt-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "JLPT N1-N5 词汇学习器（网页端）",
+  "scripts": {
+    "sync:data": "node scripts/copy-data.mjs",
+    "dev": "npm run sync:data && vite",
+    "build": "npm run sync:data && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "cap:add": "cap add android",
+    "cap:sync": "npm run build && cap sync android",
+    "android:open": "cap open android",
+    "android:debug": "npm run build && cap sync android && cd android && gradlew assembleDebug",
+    "android:release": "npm run build && cap sync android && cd android && gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor-community/text-to-speech": "^5.1.0",
+    "@capacitor/app": "^6.0.3",
+    "@capacitor/core": "^6.2.2",
+    "@capacitor/haptics": "^6.0.3",
+    "@capacitor/keyboard": "^6.0.4",
+    "@capacitor/status-bar": "^6.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.2",
+    "@capacitor/cli": "^6.2.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}

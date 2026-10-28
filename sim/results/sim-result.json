@@ -1,0 +1,133 @@
+{
+  "params": {
+    "days": 180,
+    "vocab": 1500,
+    "budget": 90,
+    "new_per_day": 20,
+    "runs": 32
+  },
+  "rows": [
+    {
+      "avgRetention": 2.9468761805041433e-40,
+      "strongRatio": 0.0,
+      "veryStrongRatio": 0.0,
+      "avgLapses": 0.0,
+      "actions": 1500.0,
+      "actionsPerWord": 1.0,
+      "efficiency": 1.9645841203360956e-40,
+      "learned": 1500.0,
+      "retainedWords": 4.420314270756215e-37,
+      "costPerRetained": 1500000.0,
+      "gradPassRate": 0.0,
+      "strategy": "no_review",
+      "name": "不复习（学一遍）"
+    },
+    {
+      "avgRetention": 0.9412527506201569,
+      "strongRatio": 0.7463890753495575,
+      "veryStrongRatio": 0.6689723491159412,
+      "avgLapses": 33.55821190164298,
+      "actions": 16015.65625,
+      "actionsPerWord": 42.00505606083151,
+      "efficiency": 0.058770780942762876,
+      "learned": 382.65625,
+      "retainedWords": 360.14058735344565,
+      "costPerRetained": 44.62307436940606,
+      "gradPassRate": 0.36665183191962325,
+      "strategy": "fixed_once",
+      "name": "一次正确即掌握 + 固定间隔"
+    },
+    {
+      "avgRetention": 0.9409603690735411,
+      "strongRatio": 0.7599194694551111,
+      "veryStrongRatio": 0.6770749412695223,
+      "avgLapses": 33.08251828592954,
+      "actions": 16071.1875,
+      "actionsPerWord": 43.566623058537886,
+      "efficiency": 0.05854953656473785,
+      "learned": 369.53125,
+      "retainedWords": 347.72163057387013,
+      "costPerRetained": 46.304713709281316,
+      "gradPassRate": 0.6712338365322379,
+      "strategy": "fixed_m3",
+      "name": "三连对（同天）+ 固定间隔"
+    },
+    {
+      "avgRetention": 0.9406929733180894,
+      "strongRatio": 0.781618973991363,
+      "veryStrongRatio": 0.6873353265774043,
+      "avgLapses": 29.82361348075588,
+      "actions": 16071.15625,
+      "actionsPerWord": 40.25751260040349,
+      "efficiency": 0.05853300144374149,
+      "learned": 399.9375,
+      "retainedWords": 376.18253253168336,
+      "costPerRetained": 42.794726377441236,
+      "gradPassRate": 0.6623049553212842,
+      "strategy": "ebbinghaus_m3",
+      "name": "三连对（同天）+ 艾宾浩斯 + 难度因子"
+    },
+    {
+      "avgRetention": 0.9407777457238359,
+      "strongRatio": 0.7906289996346012,
+      "veryStrongRatio": 0.6990745847373034,
+      "avgLapses": 28.667624674096395,
+      "actions": 16073.15625,
+      "actionsPerWord": 39.98263496231218,
+      "efficiency": 0.05853097843444018,
+      "learned": 402.59375,
+      "retainedWords": 378.7298747542049,
+      "costPerRetained": 42.50072573269763,
+      "gradPassRate": 0.7618946766537246,
+      "strategy": "kotoba",
+      "name": "本系统：三连对（跨天）+ 自适应艾宾浩斯 + 逾期惩罚"
+    }
+  ],
+  "sweep": [
+    {
+      "avgRetention": 0.9380135114179825,
+      "learned": 454.3125,
+      "retainedWords": 426.1049383136598,
+      "costPerRetained": 37.740341152530696,
+      "actions": 16014.8125,
+      "gradPassRate": 0.35960544074649275,
+      "need": 1
+    },
+    {
+      "avgRetention": 0.9468314998676469,
+      "learned": 324.71875,
+      "retainedWords": 307.4435006678933,
+      "costPerRetained": 52.312980965384014,
+      "actions": 16059.5,
+      "gradPassRate": 0.592411732417619,
+      "need": 2
+    },
+    {
+      "avgRetention": 0.9420593859790046,
+      "learned": 400.5,
+      "retainedWords": 377.3239161310925,
+      "costPerRetained": 42.666568224370685,
+      "actions": 16072.78125,
+      "gradPassRate": 0.7669547190691022,
+      "need": 3
+    },
+    {
+      "avgRetention": 0.9411232101357575,
+      "learned": 424.875,
+      "retainedWords": 399.86177140068094,
+      "costPerRetained": 40.309117307013786,
+      "actions": 16080.8125,
+      "gradPassRate": 0.8142200598204758,
+      "need": 4
+    },
+    {
+      "avgRetention": 0.9369056585567042,
+      "learned": 414.59375,
+      "retainedWords": 388.3835824761724,
+      "costPerRetained": 41.51451910083095,
+      "actions": 16088.6875,
+      "gradPassRate": 0.8148486247907689,
+      "need": 5
+    }
+  ]
+}
