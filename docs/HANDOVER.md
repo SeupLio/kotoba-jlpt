@@ -37,7 +37,7 @@
 | Android 冒烟 | WebView CDP + adb 截图 + 断网/横屏检查 | `scripts/android-smoke.mjs` | ✅ 模拟器全流程通过 |
 | 布局自查 | 手机 / 平板 / 桌面三档截图 | `scripts/inspect-layout.mjs` | ✅ 三档无横向溢出 |
 | 文档 | 面向用户的 README、设计说明、交接文档 | `README.md`、`docs/DESIGN.md`、本文 | ✅ README 只保留功能、优势、截图与使用说明，技术细节留在 docs |
-| CI | 类型检查 / 测试 / 构建 / 数据校验 | `.github/workflows/ci.yml` | ⚠️ 本地已写，受 Token 权限限制未推送（见 4.3） |
+| CI | 类型检查 / 测试 / 构建 / 数据校验 | `.github/workflows/ci.yml` | ✅ 已上线，2026-10-28 首次运行三 job 全绿（[run #1](https://github.com/SeupLio/kotoba-jlpt/actions/runs/40637652793)） |
 
 ### 1.3 词库指标（本轮重建后）
 
@@ -271,32 +271,28 @@ npm run android:release   # 需要 web/android/keystore.properties 与本地 key
 
 ### 4.3 Git 推送的特殊情况（务必注意）
 
-**常规 `git push` 在本机可以连接，但本地历史包含 `.github/workflows/ci.yml`，当前 Token 缺少
-`workflow` 权限，GitHub 会拒绝整次推送**，因此仓库内容通过 **Git Data API** 推送：
+**本地 git 历史与远端 `main` 是两条独立线**：此前仓库内容通过 **Git Data API** 以无父提交发布；
+2026-10-28 又在 GitHub 网页端补交了 `.github/workflows/ci.yml`（commit `b9809e6`），远端因此有本地没有的提交。
+**不要 `git pull` 合并这两条线，也不要 force push 覆盖远端。**
+
+当前 Token 仍是 classic OAuth，scopes 为 `gist, read:org, repo`，缺 `workflow`；而本地历史包含
+`.github/workflows/ci.yml`，所以**常规 `git push` 仍会被 GitHub 整次拒绝**。
+
+旧的全量发布脚本：
 
 ```bash
 python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 ```
 
-该脚本从 `git credential fill` 读 Token（不落盘），自动创建 blob → tree → commit → 更新 ref，
-并**跳过** `.github/workflows/*`。可选的第三个参数用于指定取提交信息的 commit-ish，默认 `HEAD`。
+它从 `git credential fill` 读 Token（不落盘），创建根提交并更新 ref，且**跳过** `.github/workflows/*`。
 
-> **注意历史结构**：脚本创建的是无父提交的根提交，因此远端 `main` 与本地 git 历史是两条独立线，
-> 远端内容始终以本地工作树为准。拿到带 `workflow` scope 的 Token 后，不要直接 `git pull` 合并这两条线；
-> 应先确认远端没有独有提交，再用一次显式 force push 重建完整历史，或继续使用本脚本。
+> **该脚本现在会删掉远端 workflow**：它用本地工作树生成完整 tree，而 tree 中没有 `ci.yml`，
+> 更新 `main` 后 GitHub 会视为删除，CI 随即失效。**此后只改文档/代码时，请用 Contents API
+> 在远端 HEAD 之上提交单个文件**，不要再跑全量脚本。本轮 `docs/HANDOVER.md` 就是通过 Contents API 更新的。
 
-> 若要补 CI：用带 `workflow` 权限的 Token 重新 push，或在 GitHub 网页端手动新建
-> `.github/workflows/ci.yml` 并粘贴本地内容。当前 Token 是 classic OAuth，实际 scopes 为
-> `gist, read:org, repo`，因此缺的正是 `workflow`。三条可行路径：
->
-> 1. 新建 classic PAT，勾选 `repo` + `workflow`，在 Windows 凭据管理器里更新 `github.com` 的凭据（或交互执行
->    `git credential approve`），然后通知我重推；**不要把 Token 贴在聊天里，也不要提交到仓库**。
-> 2. 打开 https://github.com/SeupLio/kotoba-jlpt/new/main/.github/workflows ，文件名 `ci.yml`，
->    粘贴本地 `.github/workflows/ci.yml` 的内容并提交，无需 Token 权限。
-> 3. 安装 GitHub CLI 后执行 `gh auth login --scopes workflow`，再用 `git push` 推送。
->
-> 注意：远端 `main` 是 API 生成的独立历史，常规 `git push` 前先确认远端没有独有提交；若只补 workflow，
-> 用网页端方案最省事。
+> 要恢复常规 `git push`：新建 classic PAT 勾选 `repo` + `workflow`，在 Windows 凭据管理器更新
+> `github.com` 的 Git 凭据（或 `git credential approve`）。**不要把 Token 贴在聊天里或提交到仓库。**
+> 之后仍需先备份远端 `main`、确认两条历史如何合并，未经确认不要 force push。
 
 **安全约束**：不要提交 `keystore`、`keystore.properties`、Token、`data/raw/` 或任何本机隐私数据。
 
@@ -321,11 +317,10 @@ python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 |---|---|---|---|
 | 1 | **Android 真机验证** | 模拟器已走通；真机重点检查：日语 TTS 是否出声、软键盘遮挡、物理返回键、离线启动、IndexedDB 持久化、新启动图标与闪屏 | 模拟器无音频输出，真实发声仍待验证 |
 | 2 | **平板实机验证** | 用 iPad / Android 平板检查双列布局、长列表加载、横竖屏切换、词书与统计页的留白 | 竞品在平板上翻车最多，模拟器只能覆盖尺寸 |
-| 3 | **CI workflow 推送** | `.github/workflows/ci.yml` 本地已写好；当前 Token 缺 `workflow` scope，需按 4.3 节换 Token 或网页端创建 | 防止后续改动没有自动回归 |
-| 4 | **真人使用 1~2 周** | 观察「预习后隔几个词再测」的 5 词窗口是否太长、待明日验证是否造成当日卡顿、易错词专项是否过量、考试配速建议是否合理 | 模拟不能替代真人体验；本轮改动了首次学习节奏，尤需实测 |
-| 5 | **补齐剩余 7.2% 例句** | 无例句的词会自动避开 cloze，但题型均匀性受影响 | 数据增强，非阻塞 |
-| 6 | **N1 释义颗粒度** | 部分 N1 词的义项排序与颗粒度较粗，适合按使用反馈逐步人工补录 | 内容质量 |
-| 7 | **备份 release keystore** | 本机 `web/android/app/kotoba-release.keystore` 与 `keystore.properties` 尚未做离线备份；丢失后无法升级已发布版本 | 发布后最高优先级，需人工完成 |
+| 3 | **真人使用 1~2 周** | 观察「预习后隔几个词再测」的 5 词窗口是否太长、待明日验证是否造成当日卡顿、易错词专项是否过量、考试配速建议是否合理 | 模拟不能替代真人体验；本轮改动了首次学习节奏，尤需实测 |
+| 4 | **补齐剩余 7.2% 例句** | 无例句的词会自动避开 cloze，但题型均匀性受影响 | 数据增强，非阻塞 |
+| 5 | **N1 释义颗粒度** | 部分 N1 词的义项排序与颗粒度较粗，适合按使用反馈逐步人工补录 | 内容质量 |
+| 6 | **备份 release keystore** | 本机 `web/android/app/kotoba-release.keystore` 与 `keystore.properties` 尚未做离线备份；丢失后无法升级已发布版本 | 发布后最高优先级，需人工完成 |
 
 ### 已知风险与限制
 
@@ -381,7 +376,8 @@ python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 1. 先在自己的 Android 真机上装 v1.0.0 release APK，按第五章第 1 项做真机验证（模拟器已通过，重点听音频与键盘）；
 2. 用平板过一遍双列布局与横竖屏，确认长列表与触控目标；
 3. 先离线备份 `web/android/app/kotoba-release.keystore` 与 `web/android/keystore.properties`，再继续发版；
-4. 用带 `workflow` 权限的 Token 推送 CI，让后续改动有自动回归；
+4. CI 已在远端 `main` 生效：推送到 `main` 会自动跑三个 job，也可在 Actions 页面用 `workflow_dispatch` 手动重跑；
+   本地提交仍以 `npm run typecheck` / `npm test` / `npm run build` 为准，别只看远端结果；
 5. 连续使用 1~2 周，记录「待明日验证」「易错词专项」「考试配速」三处的真实感受，再决定是否调默认参数；
 6. 有余力再补例句与 N1 释义。
 
