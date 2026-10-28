@@ -42,7 +42,7 @@
 | Android 冒烟 | WebView CDP + adb 截图 + 断网/横屏检查 | `scripts/android-smoke.mjs` | ✅ 模拟器全流程通过 |
 | 布局自查 | 手机 / 平板 / 桌面三档截图 | `scripts/inspect-layout.mjs` | ✅ 三档无横向溢出 |
 | 文档 | 面向用户的 README、设计说明、交接文档 | `README.md`、`docs/DESIGN.md`、本文 | ✅ README 只保留功能、优势、截图与使用说明，技术细节留在 docs |
-| CI | 类型检查 / 测试 / 构建 / 数据与内容校验 | `.github/workflows/ci.yml` | ✅ 已上线，2026-10-28 首次运行三 job 全绿（[run #1](https://github.com/SeupLio/kotoba-jlpt/actions/runs/40637652793)）；本轮新增 `validate_content.py` 校验步骤，待推送后验证 |
+| CI | 类型检查 / 测试 / 构建 / 数据与内容校验 | `.github/workflows/ci.yml` | ✅ 已上线，2026-10-28 首次运行三 job 全绿（[run #1](https://github.com/SeupLio/kotoba-jlpt/actions/runs/40637652793)）；`validate_dataset.py` 现会连带运行 `validate_content.py`，无需修改 workflow |
 
 ### 1.3 词库指标（本轮重建后）
 
@@ -240,7 +240,8 @@
 
 - **原创题库**：新增 `data/content/grammar-n1..n5.json`（140 点）、`reading-n1..n5.json`（15 篇 / 25 题）、
   `listening-n1..n5.json`（30 题）。全部原创，未复制官方真题或教材原文；阅读含短文 / 中文 / 情报检索三类，
-  听力含课题理解与即时应答。`scripts/validate_content.py` 校验填空还原、字段、选项、答案、解析、等级与全局 ID 唯一。
+  听力含课题理解与即时应答。`scripts/validate_content.py` 校验填空还原、字段、选项、答案、解析、等级与全局 ID 唯一；
+  `validate_dataset.py` 结尾会调用它，因此现有 CI 的 dataset job 会自动覆盖原创题库，无需改动 workflow。
 - **语法训练**：`Grammar.tsx` + `core/grammar.ts`，三种题型（形式选释义 / 释义选形式 / 例句填空）轮换；
   干扰项取同级其他语法点；连续答对 2 次判掌握；支持等级、掌握状态、关键词筛选与详情弹层；进度单独存入 IDB `grammar`。
 - **考试引擎**：`core/exam.ts` 生成固定题量的试卷（16 词汇 + 12 语法 + 2 篇阅读 + 6 听力），

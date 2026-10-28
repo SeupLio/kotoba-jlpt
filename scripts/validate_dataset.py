@@ -25,6 +25,10 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = Path(__file__).resolve().parent.parent
 PROCESSED = ROOT / "data" / "processed"
 LEVELS = ["n5", "n4", "n3", "n2", "n1"]
@@ -117,6 +121,15 @@ def main() -> int:
 
     ok = not errors and (not warns or not args.strict)
     print("\n结果：", "通过" if ok else "未通过")
+
+    print("\n" + "=" * 48)
+    print("原创语法 / 阅读 / 听力题库")
+    print("=" * 48)
+    from validate_content import main as validate_content_main
+
+    if validate_content_main() != 0:
+        ok = False
+
     return 0 if ok else 1
 
 
