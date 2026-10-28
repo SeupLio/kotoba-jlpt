@@ -1,0 +1,37 @@
+# ------------------------------------------------ 通用
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.idea/
+.vscode/
+preview_*.png
+
+# ------------------------------------------------ Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# 原始下载数据体积大且可重新获取，不入库
+data/raw/
+
+# ------------------------------------------------ Node / Web
+node_modules/
+web/dist/
+web/public/data/
+.vite/
+coverage/
+
+# ------------------------------------------------ Android
+web/android/.gradle/
+web/android/build/
+web/android/app/build/
+web/android/local.properties
+web/android/capacitor-cordova-android-plugins/build/
+web/android/.idea/
+*.apk
+*.aab
+*.keystore
+web/android/keystore.properties

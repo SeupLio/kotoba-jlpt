@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 与 web/src/styles.css 的调色板保持一致：朱红主色 + 和纸底色 -->
+    <color name="colorPrimary">#B4453A</color>
+    <color name="colorPrimaryDark">#8F352C</color>
+    <color name="colorAccent">#B4453A</color>
+    <color name="washi">#F7F4EE</color>
+    <color name="ink">#2C2A26</color>
+    <color name="washi_dark">#17181A</color>
+</resources>

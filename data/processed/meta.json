@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-10-27T16:20:49.635115+00:00",
+  "levels": {
+    "N5": {
+      "count": 674,
+      "withZh": 674,
+      "coverage": 100.0,
+      "sources": {
+        "dict:form": 571,
+        "override": 85,
+        "dict:reading": 18
+      }
+    },
+    "N4": {
+      "count": 630,
+      "withZh": 630,
+      "coverage": 100.0,
+      "sources": {
+        "override": 62,
+        "dict:form": 543,
+        "dict:reading": 25
+      }
+    },
+    "N3": {
+      "count": 1659,
+      "withZh": 1659,
+      "coverage": 100.0,
+      "sources": {
+        "dict:form": 1490,
+        "override": 152,
+        "dict:reading": 17
+      }
+    },
+    "N2": {
+      "count": 1778,
+      "withZh": 1778,
+      "coverage": 100.0,
+      "sources": {
+        "dict:reading": 79,
+        "dict:form": 1385,
+        "override": 314
+      }
+    },
+    "N1": {
+      "count": 3070,
+      "withZh": 3070,
+      "coverage": 100.0,
+      "sources": {
+        "override": 683,
+        "dict:form": 2351,
+        "dict:reading": 36
+      }
+    }
+  },
+  "total": 7811,
+  "totalWithZh": 7811,
+  "sources": {
+    "openjlpt": "evanclan/OpenJLPT (CC BY-SA 4.0)",
+    "ja-zh": "lxl66566/Japanese-Chinese-thesaurus (Unlicense)",
+    "overrides": "kotoba-jlpt 人工补录 (CC0)"
+  },
+  "buildSeconds": 28.3,
+  "coverage": 100.0
+}

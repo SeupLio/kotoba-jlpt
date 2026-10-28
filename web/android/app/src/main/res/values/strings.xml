@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">言葉 Kotoba</string>
+    <string name="title_activity_main">言葉 Kotoba</string>
+    <string name="package_name">io.github.seuplio.kotoba</string>
+    <string name="custom_url_scheme">io.github.seuplio.kotoba</string>
+</resources>
