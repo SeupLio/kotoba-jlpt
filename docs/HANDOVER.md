@@ -8,9 +8,9 @@
 > 已在浏览器实测语法练习、模考分部分提交、听力只播一次、交卷解析与历史成绩；Android debug APK 已重新构建并确认包含新题库，release APK 未重建；
 > Android 14（API 34）模拟器走通完整学习流程（撤销 / 结算 / 深色 / 断网重载 / 返回键 / 横屏，控制台零报错）；
 > 已用本地 keystore 签出 **v1.0.0 release APK（4.4 MB）**并发布到 GitHub Releases，debug APK 约 5.4 MB。
-> 本轮完成 README 用户化改版、品牌 Logo 与全端图标、词性补全与多义项、
-> 新词预习后移、沉浸式视觉与个性化设置，并重拍 21 张截图与同步文档。release 签名材料仅保存在本机，未入库。
-> **许可**：代码 MIT；`data/processed/` 数据 CC BY-SA 4.0
+> 前一轮完成 README 用户化改版、品牌 Logo 与全端图标、词性补全与多义项、新词预习后移、沉浸式视觉与个性化设置；
+> 本轮新增语法训练与限时模考，并补充截图与文档。release 签名材料仅保存在本机，未入库。
+> **许可**：代码 MIT；`data/processed/` 与 `data/content/` 按 CC BY-SA 4.0
 
 ---
 
