@@ -237,6 +237,56 @@ async function nextOne(page) {
     shots.push(`mobile-${key}.png`);
   }
 
+  // 语法训练：列表 + 练习
+  await page.locator('.navbtn', { hasText: '语法' }).click();
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: `${OUT}/mobile-grammar.png` });
+  shots.push('mobile-grammar.png');
+  const startGrammar = page.getByRole('button', { name: '开始练习' }).first();
+  if (await startGrammar.count()) {
+    await startGrammar.click();
+    await page.waitForTimeout(900);
+    await page.screenshot({ path: `${OUT}/mobile-grammar-quiz.png` });
+    shots.push('mobile-grammar-quiz.png');
+    const quitGrammar = page.getByRole('button', { name: '退出练习' }).first();
+    if (await quitGrammar.count()) {
+      await quitGrammar.click();
+      await page.waitForTimeout(500);
+    }
+  } else {
+    console.log('  [skip] 未找到语法练习入口');
+  }
+
+  // 模考：大堂 + 答题页
+  await page.locator('.navbtn', { hasText: '模考' }).click();
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: `${OUT}/mobile-exam.png` });
+  shots.push('mobile-exam.png');
+  const startExam = page.locator('.exam-start').first();
+  if (await startExam.count()) {
+    await startExam.click();
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${OUT}/mobile-exam-runner.png` });
+    shots.push('mobile-exam-runner.png');
+    const quitExam = page.locator('.exam-topbar .iconbtn[aria-label="退出考试"]').first();
+    if (await quitExam.count()) {
+      await quitExam.click();
+      await page.waitForTimeout(400);
+      const confirmQuit = page.getByRole('button', { name: '退出', exact: true }).first();
+      if (await confirmQuit.count()) {
+        await confirmQuit.click();
+        await page.waitForTimeout(500);
+      }
+    }
+    const backHome = page.getByRole('button', { name: '返回今日' }).first();
+    if (await backHome.count()) {
+      await backHome.click();
+      await page.waitForTimeout(600);
+    }
+  } else {
+    console.log('  [skip] 未找到模考开始按钮');
+  }
+
   // 深色主题：点击「深色主题」旁的开关键
   await page.locator('.navbtn', { hasText: '设置' }).click();
   await page.waitForTimeout(600);
@@ -276,6 +326,17 @@ async function nextOne(page) {
     await page.screenshot({ path: `${OUT}/desktop-${key}.png` });
     shots.push(`desktop-${key}.png`);
   }
+
+  await page.locator('.sidebtn', { hasText: '语法' }).click();
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: `${OUT}/desktop-grammar.png` });
+  shots.push('desktop-grammar.png');
+
+  await page.locator('.sidebtn', { hasText: '模考' }).click();
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: `${OUT}/desktop-exam.png` });
+  shots.push('desktop-exam.png');
+
   await ctx.close();
 }
 

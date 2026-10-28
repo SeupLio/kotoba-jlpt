@@ -193,6 +193,13 @@ N5、N4、N3、N2、N1 可以单选，也可以多选混排。选 N2 就只推 N
 
 > 语法点与例句均为项目原创，不包含官方真题或教材原文。
 
+<p align="center">
+  <img src="docs/screenshots/mobile-grammar.png" width="30%" alt="语法训练列表" />
+  <img src="docs/screenshots/mobile-grammar-quiz.png" width="30%" alt="语法练习" />
+  <img src="docs/screenshots/desktop-grammar.png" width="30%" alt="桌面端语法训练" />
+</p>
+<p align="center"><sub>按等级与掌握状态筛选 · 三种题型轮换 · 桌面端双列浏览</sub></p>
+
 ---
 
 ## JLPT 模考
@@ -208,6 +215,13 @@ N5、N4、N3、N2、N1 可以单选，也可以多选混排。选 N2 就只推 N
 题库体量小于真实试卷，因此时长按题量等比压缩（界面会标注），但科目顺序、单科最低分与合格线保持一致。
 
 > 本应用**不包含历年真题与官方听力音频**。所有题目和听力脚本均为原创，仅用于自测；官方样题请访问 [jlpt.jp 官方样题](https://www.jlpt.jp/e/samples/)。
+
+<p align="center">
+  <img src="docs/screenshots/mobile-exam.png" width="30%" alt="模考大堂" />
+  <img src="docs/screenshots/mobile-exam-runner.png" width="30%" alt="限时答题" />
+  <img src="docs/screenshots/desktop-exam.png" width="30%" alt="桌面端模考大堂" />
+</p>
+<p align="center"><sub>按等级查看结构与合格线 · 分部分倒计时 · 桌面端模考大堂</sub></p>
 
 ---
 
@@ -266,6 +280,8 @@ N5、N4、N3、N2、N1 可以单选，也可以多选混排。选 N2 就只推 N
 - [查看版本说明](https://github.com/SeupLio/kotoba-jlpt/releases/tag/v1.0.0)
 - 也可以按 [开发与交接说明](docs/HANDOVER.md) 自行构建
 
+> v1.0.0 APK 尚未包含本轮新增的语法训练与模考；最新 Web 代码已同步进 debug 包，正式 release 将在下个版本发布。
+
 ### 第一次打开
 
 1. 选择要学的等级（可多选）。
@@ -322,7 +338,7 @@ N5、N4、N3、N2、N1 可以单选，也可以多选混排。选 N2 就只推 N
 
 **Android 版在真机上稳定吗？**
 
-已在 Android 14（API 34）模拟器上走通新手引导、预习、多种题型、撤销、退出结算、词库搜索、统计、深色主题、软键盘、返回键、横竖屏与断网启动。不同厂商的 TTS、输入法与手势条可能存在差异，建议在自己的设备上再确认。发音音色与音调取决于系统语音包，本应用不含音调标注。语法训练与模考为新增功能，已在桌面浏览器完成全流程实测，Android 真机仍待抽测。
+已在 Android 14（API 34）模拟器上走通新手引导、预习、多种题型、撤销、退出结算、词库搜索、统计、深色主题、软键盘、返回键、横竖屏与断网启动。不同厂商的 TTS、输入法与手势条可能存在差异，建议在自己的设备上再确认。发音音色与音调取决于系统语音包，本应用不含音调标注。语法训练与模考为新增功能，已在桌面浏览器完成全流程实测，debug APK 已包含新题库，Android 真机仍待抽测。
 
 ---
 

@@ -5,7 +5,7 @@
 > **本地路径**：`E:\hc\kotoba-jlpt`
 > **当前状态**：Web + Android 双端闭环；Web 通过类型检查、**70 项单测**、生产构建、Playwright 全流程与离线重载；
 > 本轮新增 **140 个原创语法点 / 15 篇阅读 / 30 道听力 / 限时 JLPT 模考**（原创题库，不含真题），
-> 已在浏览器实测语法练习、模考分部分提交、听力只播一次、交卷解析与历史成绩；Android 端尚未重新打包；
+> 已在浏览器实测语法练习、模考分部分提交、听力只播一次、交卷解析与历史成绩；Android debug APK 已重新构建并确认包含新题库，release APK 未重建；
 > Android 14（API 34）模拟器走通完整学习流程（撤销 / 结算 / 深色 / 断网重载 / 返回键 / 横屏，控制台零报错）；
 > 已用本地 keystore 签出 **v1.0.0 release APK（4.4 MB）**并发布到 GitHub Releases，debug APK 约 5.4 MB。
 > 本轮完成 README 用户化改版、品牌 Logo 与全端图标、词性补全与多义项、
@@ -32,13 +32,13 @@
 | 中文释义补录 | 人工补录 1296 条 | `data/overrides/zh_glosses_1~5.json` | ✅ 已入库 |
 | 词库成品 | N5–N1 五个分级 JSON + 索引 | `data/processed/` | ✅ 括号配对 0 异常，已重建 |
 | Web 应用 | React 18 + TS + Vite + PWA | `web/` | ✅ 本轮已重建 |
-| Android 应用 | Capacitor 6 打包 | `web/android/` | ✅ v1.0.0 release APK 4.4 MB 已签名并发布；debug 5.4 MB；模拟器全流程通过，真机 TTS 未验证 |
+| Android 应用 | Capacitor 6 打包 | `web/android/` | ✅ v1.0.0 release APK 4.4 MB 已签名并发布；debug 5.4 MB 已用新题库重建；模拟器全流程通过，真机 TTS 未验证 |
 | 算法验证 | 蒙特卡洛模拟 + 参数敏感性 | `sim/` | ✅ 结论稳定（32 次重复） |
 | 单元测试 | **70 项**（srs / quiz / scheduler / pace / grammar / exam） | `web/src/core/*.test.ts` | ✅ 全部通过 |
 | 原创题库 | 语法 140 点、阅读 15 篇 / 25 题、听力 30 题 | `data/content/*.json` | ✅ 结构校验 + 全局 ID 唯一 |
 | 语法训练 | 三种题型、进度、详情、练习与错题回顾 | `web/src/pages/Grammar.tsx`、`core/grammar.ts` | ✅ 浏览器实测通过 |
 | JLPT 模考 | 分科倒计时、锁定提交、听力单播、评分与历史成绩 | `web/src/pages/Exam*.tsx`、`core/exam.ts` | ✅ 浏览器实测全流程通过 |
-| 界面自查 | Playwright 截图 + 控制台错误监控 | `scripts/capture.mjs`、`docs/screenshots/` | ✅ 21 张截图（含 Android 实拍） |
+| 界面自查 | Playwright 截图 + 控制台错误监控 | `scripts/capture.mjs`、`docs/screenshots/` | ✅ 27 张截图（含语法、模考与 Android 实拍） |
 | Android 冒烟 | WebView CDP + adb 截图 + 断网/横屏检查 | `scripts/android-smoke.mjs` | ✅ 模拟器全流程通过 |
 | 布局自查 | 手机 / 平板 / 桌面三档截图 | `scripts/inspect-layout.mjs` | ✅ 三档无横向溢出 |
 | 文档 | 面向用户的 README、设计说明、交接文档 | `README.md`、`docs/DESIGN.md`、本文 | ✅ README 只保留功能、优势、截图与使用说明，技术细节留在 docs |
@@ -254,6 +254,10 @@
   考试页进入专注模式（隐藏顶栏 / 侧栏 / 底栏）；Android 返回键在考试中触发退出确认。
 - **实测**：浏览器走通语法列表 / 详情 / 练习反馈 / 进度持久化；N5 模考完成两科提交、听力单播、
   交卷解析与历史成绩回看。模考大堂题量文案按实际 37 题修正。
+- **截图**：`capture.mjs` 新增语法列表 / 语法练习 / 模考大堂 / 限时答题 / 桌面端语法与模考截图，
+  README 已引用；本轮共生成 24 张 Web 截图（仓库合计 27 张，含 Android 实拍）。
+- **Android**：`npm run android:debug` 构建成功（5.4 MB），已确认 APK 的 `assets/public/data/content/`
+  包含语法、阅读、听力题库；release APK 与 GitHub Release 本轮未更新。
 
 ---
 
