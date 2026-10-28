@@ -3,7 +3,9 @@
 > **交接日期**：2026-10-28
 > **仓库**：https://github.com/SeupLio/kotoba-jlpt（公开）
 > **本地路径**：`E:\hc\kotoba-jlpt`
-> **当前状态**：Web + Android 双端闭环；Web 通过类型检查、**56 项单测**、生产构建、Playwright 全流程与离线重载；
+> **当前状态**：Web + Android 双端闭环；Web 通过类型检查、**70 项单测**、生产构建、Playwright 全流程与离线重载；
+> 本轮新增 **140 个原创语法点 / 15 篇阅读 / 30 道听力 / 限时 JLPT 模考**（原创题库，不含真题），
+> 已在浏览器实测语法练习、模考分部分提交、听力只播一次、交卷解析与历史成绩；Android 端尚未重新打包；
 > Android 14（API 34）模拟器走通完整学习流程（撤销 / 结算 / 深色 / 断网重载 / 返回键 / 横屏，控制台零报错）；
 > 已用本地 keystore 签出 **v1.0.0 release APK（4.4 MB）**并发布到 GitHub Releases，debug APK 约 5.4 MB。
 > 本轮完成 README 用户化改版、品牌 Logo 与全端图标、词性补全与多义项、
@@ -32,12 +34,15 @@
 | Web 应用 | React 18 + TS + Vite + PWA | `web/` | ✅ 本轮已重建 |
 | Android 应用 | Capacitor 6 打包 | `web/android/` | ✅ v1.0.0 release APK 4.4 MB 已签名并发布；debug 5.4 MB；模拟器全流程通过，真机 TTS 未验证 |
 | 算法验证 | 蒙特卡洛模拟 + 参数敏感性 | `sim/` | ✅ 结论稳定（32 次重复） |
-| 单元测试 | **56 项**（srs / quiz / scheduler / pace） | `web/src/core/*.test.ts` | ✅ 全部通过 |
+| 单元测试 | **70 项**（srs / quiz / scheduler / pace / grammar / exam） | `web/src/core/*.test.ts` | ✅ 全部通过 |
+| 原创题库 | 语法 140 点、阅读 15 篇 / 25 题、听力 30 题 | `data/content/*.json` | ✅ 结构校验 + 全局 ID 唯一 |
+| 语法训练 | 三种题型、进度、详情、练习与错题回顾 | `web/src/pages/Grammar.tsx`、`core/grammar.ts` | ✅ 浏览器实测通过 |
+| JLPT 模考 | 分科倒计时、锁定提交、听力单播、评分与历史成绩 | `web/src/pages/Exam*.tsx`、`core/exam.ts` | ✅ 浏览器实测全流程通过 |
 | 界面自查 | Playwright 截图 + 控制台错误监控 | `scripts/capture.mjs`、`docs/screenshots/` | ✅ 21 张截图（含 Android 实拍） |
 | Android 冒烟 | WebView CDP + adb 截图 + 断网/横屏检查 | `scripts/android-smoke.mjs` | ✅ 模拟器全流程通过 |
 | 布局自查 | 手机 / 平板 / 桌面三档截图 | `scripts/inspect-layout.mjs` | ✅ 三档无横向溢出 |
 | 文档 | 面向用户的 README、设计说明、交接文档 | `README.md`、`docs/DESIGN.md`、本文 | ✅ README 只保留功能、优势、截图与使用说明，技术细节留在 docs |
-| CI | 类型检查 / 测试 / 构建 / 数据校验 | `.github/workflows/ci.yml` | ✅ 已上线，2026-10-28 首次运行三 job 全绿（[run #1](https://github.com/SeupLio/kotoba-jlpt/actions/runs/40637652793)） |
+| CI | 类型检查 / 测试 / 构建 / 数据与内容校验 | `.github/workflows/ci.yml` | ✅ 已上线，2026-10-28 首次运行三 job 全绿（[run #1](https://github.com/SeupLio/kotoba-jlpt/actions/runs/40637652793)）；本轮新增 `validate_content.py` 校验步骤，待推送后验证 |
 
 ### 1.3 词库指标（本轮重建后）
 
@@ -58,6 +63,20 @@
 
 - OpenJLPT — CC BY-SA 4.0
 - Japanese-Chinese-thesaurus — Unlicense
+
+### 1.5 原创题库指标（2026-10-28 新增）
+
+| 指标 | 数值 |
+|---|---|
+| 语法点 | **140**（N5 30 / N4 30 / N3 30 / N2 25 / N1 25） |
+| 阅读 | 15 篇 / 25 题（每级 3 篇：short / medium / info 各 1） |
+| 听力 | 30 题（每级 6 题：point 3 + response 3） |
+| 唯一内容 ID | 185 |
+| 校验 | 语法填空可还原例句、字段/等级/选项/答案/解析完整、全局 ID 唯一 |
+| 考试结构 | N1–N3 三科（60/60/60，单科 19）；N4–N5 两科（言语知识+阅读 120，单科 38；听力 60，单科 19） |
+| 合格线 | N1 100 / N2 90 / N3 95 / N4 90 / N5 80 |
+
+所有语法例句、阅读文章与听力脚本均为项目原创；未内置历年真题或官方音频，仅外链官方样题入口。
 
 ---
 
@@ -186,7 +205,7 @@
 | 自动把久未复习判为已掌握 | 明确禁止；只有连续答对且跨天验证才提升状态，间隔再长也不会被系统「送分」 |
 | 记忆模式单一、缺少递进 | 9 种题型 + `retryMode()` 答错换通道重练 + 场次内 3~5 题后重现 + 跨天验证，形成递进式多轮复习 |
 | 拼写功能缺失 | `typing` 题型：听音/看义拼写，支持假名与汉字输入，提交后可对照读音 |
-| 笔记 / 搜索 / 自定义语料库 | 词条支持个人笔记与自定义释义；词书支持汉字、假名、释义、笔记全文搜索；**暂不做自定义语料库**（见 DESIGN 第 10 节） |
+| 笔记 / 搜索 / 自定义语料库 | 词条支持个人笔记与自定义释义；词书支持汉字、假名、释义、笔记全文搜索；**暂不做自定义语料库**（见 DESIGN 第 11 节） |
 | 平板闪退 / 列表不全 / 界面乱 | 增加全局 ErrorBoundary；三档响应式布局；词书每批渲染 60 条并可「加载更多」；56 项单测 + 模拟器走查 |
 
 ### 3.9 响应式重设计与视觉统一
@@ -217,6 +236,24 @@
 - **脚本**：`capture.mjs`、`inspect-layout.mjs`、`android-smoke.mjs` 均适配「连续预习直到出题」的新流程；
   README 截图已全部重拍。
 
+### 3.11 语法训练与限时模考（2026-10-28）
+
+- **原创题库**：新增 `data/content/grammar-n1..n5.json`（140 点）、`reading-n1..n5.json`（15 篇 / 25 题）、
+  `listening-n1..n5.json`（30 题）。全部原创，未复制官方真题或教材原文；阅读含短文 / 中文 / 情报检索三类，
+  听力含课题理解与即时应答。`scripts/validate_content.py` 校验填空还原、字段、选项、答案、解析、等级与全局 ID 唯一。
+- **语法训练**：`Grammar.tsx` + `core/grammar.ts`，三种题型（形式选释义 / 释义选形式 / 例句填空）轮换；
+  干扰项取同级其他语法点；连续答对 2 次判掌握；支持等级、掌握状态、关键词筛选与详情弹层；进度单独存入 IDB `grammar`。
+- **考试引擎**：`core/exam.ts` 生成固定题量的试卷（16 词汇 + 12 语法 + 2 篇阅读 + 6 听力），
+  按等级计算各科时长与合格线；评分按科目比例折算，单科未达最低分即不合格；同 seed 可复现，已单测覆盖。
+- **考场约束**：`ExamRunner.tsx` 每部分独立倒计时、提交确认、提交后锁定、时间到自动提交；
+  听力每题自动播放且只播一次，播放后按钮禁用；设备无日语语音时听力退化为文字模式并明示。
+- **结果与历史**：`ExamResult.tsx` 统一公布总分、单科分、合格判定与逐题解析（阅读原文 / 听力脚本可展开）；
+  `Exam.tsx` 保存历史成绩、模考次数、合格次数与最高分，`exams` store 随备份迁移。
+- **集成**：路由新增 `grammar` / `exam`；桌面侧栏与手机底栏加入入口；首页新增双入口桥接卡；
+  考试页进入专注模式（隐藏顶栏 / 侧栏 / 底栏）；Android 返回键在考试中触发退出确认。
+- **实测**：浏览器走通语法列表 / 详情 / 练习反馈 / 进度持久化；N5 模考完成两科提交、听力单播、
+  交卷解析与历史成绩回看。模考大堂题量文案按实际 37 题修正。
+
 ---
 
 ## 四、环境与复现说明
@@ -241,7 +278,7 @@ cd E:/hc/kotoba-jlpt/web
 npm run sync:data     # data/processed → public/data
 npm run dev
 npm run typecheck
-npm test              # 56 项
+npm test              # 70 项
 npm run build
 
 # 界面截图与冒烟（先启动 dev server）
@@ -258,6 +295,7 @@ cd E:/hc/kotoba-jlpt
 python scripts/fetch_sources.py      # 需要联网，抓取 data/raw/
 python scripts/build_dataset.py
 python scripts/validate_dataset.py
+python scripts/validate_content.py   # 语法 / 阅读 / 听力原创题库
 
 # 算法验证（约 1~2 分钟）
 python sim/srs_sim.py --runs 32
@@ -321,10 +359,15 @@ python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 | 4 | **补齐剩余 7.2% 例句** | 无例句的词会自动避开 cloze，但题型均匀性受影响 | 数据增强，非阻塞 |
 | 5 | **N1 释义颗粒度** | 部分 N1 词的义项排序与颗粒度较粗，适合按使用反馈逐步人工补录 | 内容质量 |
 | 6 | **备份 release keystore** | 本机 `web/android/app/kotoba-release.keystore` 与 `keystore.properties` 尚未做离线备份；丢失后无法升级已发布版本 | 发布后最高优先级，需人工完成 |
+| 7 | **语法 / 模考真机验证** | Android WebView 下重点检查模考倒计时在后台切换时的准确性、听力 TTS 只播一次、返回键退出确认、历史成绩持久化 | 新功能目前只在桌面浏览器实测 |
+| 8 | **扩充原创题库** | 当前每级语法 25–30 点、阅读 3 篇、听力 6 题，远小于真实试卷；按使用反馈增补，始终保持原创与许可清晰 | 内容增强；不得引入真题或版权不明音频 |
 
 ### 已知风险与限制
 
-- **TTS 依赖系统语音包**：Android 若未安装日语语音数据，听力题型会被自动剔除；模拟器无音频输出，**发声质量与音调未验证**；
+- **TTS 依赖系统语音包**：Android 若未安装日语语音数据，词汇听力题型会被自动剔除，模考听力退化为文字模式；模拟器无音频输出，**发声质量与音调未验证**；
+- **模考不是真题**：题库全部原创且体量小于真实试卷，时长按题量压缩，分数仅供自测，不能替代官方成绩；
+- **未内置真题与官方音频**：受版权限制，仅外链 jlpt.jp 官方样题；如需扩充，必须确认授权；
+- **模考听力依赖 TTS**：无日语语音的设备无法测试真实听力表现，文字模式只验证阅读理解；
 - **模拟 ≠ 真人实验**：`sim/` 的结论用于策略间相对比较，真实记忆曲线因人而异；
 - **词库以 JLPT 考试词表为准**：不含专业术语与方言；
 - **中文释义为机器辅助 + 人工补录**：约 1296 条人工补录，其余来自开源词库；
@@ -341,6 +384,13 @@ python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 | 决策 | 原因 | 影响面 |
 |---|---|---|
 | 排除 egg rolls 牌组 | CC BY-NC 4.0 禁止商用/限制再分发 | 词库收录范围 |
+| 不内置历年真题与官方音频 | 真题与音频版权风险高，且项目需要开源再分发；只外链官方样题 | `data/content/`、`Exam.tsx` |
+| 模考时长按题量等比压缩 | 原创题库小于真题，硬套官方时长会让人大量空等 | `core/exam.ts` |
+| 听力只播一次、TTS 现场合成 | 还原考场约束；音频文件无法随仓库分发 | `ExamRunner.tsx`、`useSpeech` |
+| 无日语语音时听力退化为文字模式 | 不出无声死题，同时保留题量与计分结构 | `ExamRunner.tsx` |
+| 语法掌握判定用连续 2 次 | 语法点比单词更结构化，2 次足以确认形式—意义联结 | `core/grammar.ts` |
+| 语法 / 模考进度与词汇 SRS 分库 | 三类内容节奏不同，混在一起会污染每日复习队列 | IDB `grammar` / `exams` |
+| 备份格式升级到 v2 且兼容 v1 | 新增 grammar / exams store，旧备份仍可导入 | `db/store.ts` |
 | TTS 改用双后端抽象 | Android WebView 不支持 `speechSynthesis` | `src/hooks/useSpeech.ts` |
 | 掌握判定加入「跨 2 个日期」 | 挡住「当场记得、隔天就忘」的假熟练；模拟显示首次复习通过率提升约 10 个百分点 | `src/core/srs.ts` |
 | 默认 `masteryStreak=3` 而非模拟最优的 4 | 需求方明确指定 3 次；已在设置页开放调整 | `DEFAULT_SETTINGS` |
@@ -363,7 +413,7 @@ python scripts/push_via_api.py SeupLio/kotoba-jlpt main
 | Service Worker 缓存名构建时注入时间戳 | 手写版本号容易忘记升级，导致发版后仍读旧缓存 | `vite.config.ts`、`public/sw.js` |
 | TTS 只送假名、不标注音调 | 避免汉字多音误读；没有可靠音调数据时不假装专业 | `useSpeech.ts`、`DESIGN.md` 4.6 |
 | 不做长期未复习自动核销 | 与「已掌握」语义冲突，会让用户误以为学会了；复习债用负载视图与上限管理 | `srs.ts` 回归测试 |
-| 不做自定义语料库 | 用户自建内容难以校验许可与释义质量，且与 JLPT 分级目标冲突；用笔记/自定义释义替代 | `DESIGN.md` 第 10 节 |
+| 不做自定义语料库 | 用户自建内容难以校验许可与释义质量，且与 JLPT 分级目标冲突；用笔记/自定义释义替代 | `DESIGN.md` 第 11 节 |
 | 三档断点 720 / 1024 | 手机单列、平板居中、桌面侧栏，覆盖常见浏览器与设备宽度 | `styles.css` |
 | `data/raw/` 入 gitignore | 原始数据体积大且可重新下载 | 重建词库需先跑 `fetch_sources.py` |
 | release keystore 只留本机 | 签名私钥一旦入库等同泄露，任何人都能伪造升级包 | `*.keystore`、`keystore.properties` 均在 gitignore |

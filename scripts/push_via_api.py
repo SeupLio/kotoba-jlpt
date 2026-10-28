@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
-"""通过 GitHub Git Data API 推送提交（当 git 协议/SSH 通道不可用时的兜底方案）。
+"""通过 GitHub Git Data API 在远端分支之上追加一次提交。
 
 用法：
     python scripts/push_via_api.py <owner/repo> <branch> [commit-ish]
 
-commit-ish 用于取提交信息，默认 HEAD。
-令牌从 git credential（host=github.com）读取，不落盘、不打印。
+行为：
+- 以远端分支当前 HEAD 为父提交，使用 base_tree 叠加本地已跟踪文件；
+- 远端独有的文件（例如网页端提交的 `.github/workflows/ci.yml`）会被保留；
+- 令牌缺少 workflow 权限时跳过 `.github/workflows/*`，不会删除远端 workflow；
+- 令牌从 git credential（host=github.com）读取，不落盘、不打印。
+
+适用于 git push 因令牌缺 workflow 权限被整次拒绝的情况。
 """
 from __future__ import annotations
 
@@ -20,6 +25,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 API = "https://api.github.com"
+WORKFLOW_PREFIX = ".github/workflows/"
 
 
 def get_token() -> str:
@@ -55,6 +61,17 @@ def tracked_files() -> list[tuple[str, str, str]]:
     return items
 
 
+def remote_head(s: requests.Session, repo: str, branch: str) -> tuple[str | None, str | None]:
+    r = s.get(f"{API}/repos/{repo}/git/ref/heads/{branch}", timeout=30)
+    if r.status_code == 404:
+        return None, None
+    r.raise_for_status()
+    commit_sha = r.json()["object"]["sha"]
+    c = s.get(f"{API}/repos/{repo}/git/commits/{commit_sha}", timeout=30)
+    c.raise_for_status()
+    return commit_sha, c.json()["tree"]["sha"]
+
+
 def main() -> int:
     if len(sys.argv) < 2:
         print(__doc__)
@@ -74,21 +91,24 @@ def main() -> int:
 
     files = tracked_files()
     # GitHub 要求令牌带 `workflow` 权限才允许写入 .github/workflows/*，
-    # 缺失时表现为 404。这类文件跳过并在最后提示，不影响其余内容推送。
-    skipped = [f for f in files if f[0].startswith(".github/workflows/")]
-    files = [f for f in files if not f[0].startswith(".github/workflows/")]
+    # 缺失时表现为 404。这里跳过本地 workflow 文件，并让 base_tree 保留远端版本。
+    skipped = [f for f in files if f[0].startswith(WORKFLOW_PREFIX)]
+    files = [f for f in files if not f[0].startswith(WORKFLOW_PREFIX)]
     print(f"[1/5] 待上传 {len(files)} 个文件（跳过 {len(skipped)} 个需 workflow 权限的文件）")
 
-    # GitHub 不允许在完全空的仓库上创建 blob，先写一个占位文件让仓库非空；
-    # 随后用 force 更新分支指向真正的首个提交，占位提交会成为孤儿，历史保持干净。
-    probe = s.post(f"{API}/repos/{repo}/git/blobs", json={"content": "eA==", "encoding": "base64"}, timeout=30)
-    if probe.status_code == 409:
-        print("[0/5] 仓库为空，先创建占位提交")
-        s.put(
-            f"{API}/repos/{repo}/contents/.gitkeep",
-            json={"message": "chore: bootstrap repository", "content": ""},
-            timeout=30,
-        ).raise_for_status()
+    parent, base_tree = remote_head(s, repo, branch)
+    if parent:
+        print(f"[2/5] 远端 {branch} 当前 HEAD {parent[:12]}，将在其之上提交")
+    else:
+        print(f"[2/5] 远端 {branch} 不存在，将创建首个提交")
+        # 空仓库不能直接建 tree 之外的东西；先写占位文件让仓库非空。
+        probe = s.post(f"{API}/repos/{repo}/git/blobs", json={"content": "eA==", "encoding": "base64"}, timeout=30)
+        if probe.status_code == 409:
+            s.put(
+                f"{API}/repos/{repo}/contents/.gitkeep",
+                json={"message": "chore: bootstrap repository", "content": ""},
+                timeout=30,
+            ).raise_for_status()
 
     def make_blob(item):
         path, sha, mode = item
@@ -108,9 +128,9 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=8) as ex:
         results = list(ex.map(make_blob, files))
     total = sum(r[3] for r in results)
-    print(f"[2/4] 已创建 blob，合计 {total/1024/1024:.1f} MB")
+    print(f"[3/5] 已创建 blob，合计 {total/1024/1024:.1f} MB")
 
-    tree = [
+    tree_entries = [
         {
             "path": path,
             "mode": "100755" if mode == "100755" else "100644",
@@ -119,13 +139,15 @@ def main() -> int:
         }
         for path, sha, mode, _ in results
     ]
-    r = s.post(f"{API}/repos/{repo}/git/trees", json={"tree": tree}, timeout=120)
+    tree_payload: dict = {"tree": tree_entries}
+    if base_tree:
+        tree_payload["base_tree"] = base_tree
+    r = s.post(f"{API}/repos/{repo}/git/trees", json=tree_payload, timeout=120)
     if r.status_code >= 400:
         print("tree 错误:", r.status_code, r.text[:600])
-        print("样例条目:", json.dumps(tree[:2], ensure_ascii=False))
     r.raise_for_status()
     tree_sha = r.json()["sha"]
-    print(f"[3/4] 创建 tree {tree_sha}")
+    print(f"[4/5] 创建 tree {tree_sha}")
 
     msg_ref = sys.argv[3] if len(sys.argv) > 3 else "HEAD"
     msg = subprocess.run(
@@ -137,31 +159,30 @@ def main() -> int:
         errors="replace",
         check=True,
     ).stdout.strip()
-    r = s.post(
-        f"{API}/repos/{repo}/git/commits",
-        json={"message": msg, "tree": tree_sha, "parents": []},
-        timeout=60,
-    )
+    commit_payload: dict = {"message": msg, "tree": tree_sha}
+    if parent:
+        commit_payload["parents"] = [parent]
+    r = s.post(f"{API}/repos/{repo}/git/commits", json=commit_payload, timeout=60)
     r.raise_for_status()
     commit_sha = r.json()["sha"]
-    print(f"[4/4] 创建 commit {commit_sha}")
+    print(f"[5/5] 创建 commit {commit_sha}")
 
-    # 首次推送：创建分支引用
-    r = s.post(
-        f"{API}/repos/{repo}/git/refs",
-        json={"ref": f"refs/heads/{branch}", "sha": commit_sha},
-        timeout=60,
-    )
-    if r.status_code == 422:
+    if parent:
         r = s.patch(
             f"{API}/repos/{repo}/git/refs/heads/{branch}",
-            json={"sha": commit_sha, "force": True},
+            json={"sha": commit_sha, "force": False},
+            timeout=60,
+        )
+    else:
+        r = s.post(
+            f"{API}/repos/{repo}/git/refs",
+            json={"ref": f"refs/heads/{branch}", "sha": commit_sha},
             timeout=60,
         )
     r.raise_for_status()
     print(f"完成：https://github.com/{repo}/tree/{branch}")
     if skipped:
-        print("\n以下文件因令牌缺少 workflow 权限未上传，请在本地执行 git push 补上：")
+        print("\n以下文件因令牌缺少 workflow 权限未上传（远端原文件保持不变）：")
         for path, *_ in skipped:
             print("  -", path)
     return 0

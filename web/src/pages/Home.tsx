@@ -7,6 +7,7 @@ import { estimateMinutes } from '../core/scheduler';
 import { computePace } from '../core/pace';
 import { reviewLoad } from '../core/stats';
 import { ProgressRing } from '../components/ui';
+import { IconExam, IconPen } from '../components/icons';
 import type { DailyRecord } from '../db/store';
 
 interface Props {
@@ -23,6 +24,9 @@ interface Props {
   onDrillLeech: () => void;
   onBackup: () => void;
   onSetNewPerDay: (n: number) => void;
+  grammarMastered: number;
+  onGoGrammar: () => void;
+  onGoExam: () => void;
 }
 
 export function Home({
@@ -39,6 +43,9 @@ export function Home({
   onDrillLeech,
   onBackup,
   onSetNewPerDay,
+  grammarMastered,
+  onGoGrammar,
+  onGoExam,
 }: Props) {
   const stats = useMemo(() => {
     let mastered = 0;
@@ -227,6 +234,35 @@ export function Home({
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="card bridge-card">
+        <button className="bridge-item" onClick={onGoGrammar} type="button">
+          <span className="bridge-icon">
+            <IconPen size={22} />
+          </span>
+          <span className="bridge-copy">
+            <b>语法训练</b>
+            <span className="tiny">
+              {grammarMastered > 0 ? `已掌握 ${grammarMastered} 个语法点` : 'N1–N5 原创语法 · 三种题型'}
+            </span>
+          </span>
+          <span className="bridge-arrow" aria-hidden="true">
+            ›
+          </span>
+        </button>
+        <button className="bridge-item" onClick={onGoExam} type="button">
+          <span className="bridge-icon exam">
+            <IconExam size={22} />
+          </span>
+          <span className="bridge-copy">
+            <b>JLPT 模考</b>
+            <span className="tiny">按科目限时 · 听力只播一次</span>
+          </span>
+          <span className="bridge-arrow" aria-hidden="true">
+            ›
+          </span>
+        </button>
       </div>
 
       {plan && plan.reviewBacklog > 0 && (

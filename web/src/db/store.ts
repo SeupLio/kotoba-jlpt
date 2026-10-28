@@ -2,6 +2,8 @@
 
 import type { Settings, WordProgress } from '../core/types';
 import { DEFAULT_SETTINGS } from '../core/types';
+import type { GrammarProgress } from '../core/grammar';
+import type { ExamRecord } from '../core/exam';
 import { STORE, idbBulkPut, idbGet, idbGetAll, idbPut, idbClear } from './idb';
 import { dateKey } from '../core/srs';
 
@@ -76,7 +78,7 @@ export async function bumpDaily(now: number, patch: Partial<DailyRecord>): Promi
   return next;
 }
 
-export interface ExportBundle {
+export interface ExportBundleV1 {
   version: 1;
   exportedAt: string;
   settings: Settings;
@@ -84,27 +86,88 @@ export interface ExportBundle {
   daily: DailyRecord[];
 }
 
-export async function exportAll(): Promise<ExportBundle> {
-  const [settings, progress, daily] = await Promise.all([
+export interface ExportBundleV2 {
+  version: 2;
+  exportedAt: string;
+  settings: Settings;
+  progress: WordProgress[];
+  daily: DailyRecord[];
+  grammar: GrammarProgress[];
+  exams: ExamRecord[];
+}
+
+export type ExportBundle = ExportBundleV1 | ExportBundleV2;
+
+export async function exportAll(): Promise<ExportBundleV2> {
+  const [settings, progress, daily, grammar, exams] = await Promise.all([
     loadSettings(),
     idbGetAll<WordProgress>(STORE.progress),
     idbGetAll<DailyRecord>(STORE.daily),
+    idbGetAll<GrammarProgress>(STORE.grammar),
+    idbGetAll<ExamRecord>(STORE.exams),
   ]);
-  return { version: 1, exportedAt: new Date().toISOString(), settings, progress, daily };
+  return {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    settings,
+    progress,
+    daily,
+    grammar,
+    exams,
+  };
 }
 
 export async function importAll(bundle: ExportBundle): Promise<void> {
-  if (!bundle || bundle.version !== 1) throw new Error('备份文件格式不正确');
+  if (!bundle || (bundle.version !== 1 && bundle.version !== 2)) throw new Error('备份文件格式不正确');
   if (!bundle.settings || typeof bundle.settings !== 'object') throw new Error('备份文件缺少设置');
   if (!Array.isArray(bundle.progress) || !Array.isArray(bundle.daily)) throw new Error('备份文件缺少学习记录');
+  const grammar = bundle.version === 2 && Array.isArray(bundle.grammar) ? bundle.grammar : [];
+  const exams = bundle.version === 2 && Array.isArray(bundle.exams) ? bundle.exams : [];
   // 先清空再写入：否则备份里没有的词会残留旧进度，形成「导入后反而多出记录」的错觉
-  await Promise.all([idbClear(STORE.progress), idbClear(STORE.daily)]);
+  await Promise.all([
+    idbClear(STORE.progress),
+    idbClear(STORE.daily),
+    idbClear(STORE.grammar),
+    idbClear(STORE.exams),
+  ]);
   await idbPut(STORE.settings, { ...DEFAULT_SETTINGS, ...bundle.settings }, 'app');
   await idbBulkPut(STORE.progress, bundle.progress);
   await idbBulkPut(STORE.daily, bundle.daily);
+  await idbBulkPut(STORE.grammar, grammar);
+  await idbBulkPut(STORE.exams, exams);
 }
 
 export async function resetAll(): Promise<void> {
-  await idbClear(STORE.progress);
-  await idbClear(STORE.daily);
+  await Promise.all([
+    idbClear(STORE.progress),
+    idbClear(STORE.daily),
+    idbClear(STORE.grammar),
+    idbClear(STORE.exams),
+  ]);
+}
+
+/* ------------------------------------------------------------ 语法进度 */
+
+export async function loadGrammarProgress(): Promise<Map<string, GrammarProgress>> {
+  const rows = await idbGetAll<GrammarProgress>(STORE.grammar);
+  return new Map(rows.map((r) => [r.id, r]));
+}
+
+export async function saveGrammarProgress(items: GrammarProgress[]): Promise<void> {
+  await idbBulkPut(STORE.grammar, items);
+}
+
+/* ------------------------------------------------------------ 模考记录 */
+
+export async function loadExams(): Promise<ExamRecord[]> {
+  const rows = await idbGetAll<ExamRecord>(STORE.exams);
+  return rows.sort((a, b) => b.finishedAt - a.finishedAt);
+}
+
+export async function saveExam(record: ExamRecord): Promise<void> {
+  await idbPut(STORE.exams, record);
+}
+
+export async function clearExams(): Promise<void> {
+  await idbClear(STORE.exams);
 }

@@ -1,13 +1,15 @@
 /** 极简 IndexedDB 封装（无第三方依赖，便于离线 PWA 与 Capacitor 打包） */
 
 const DB_NAME = 'kotoba-jlpt';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export const STORE = {
   progress: 'progress',
   settings: 'settings',
   daily: 'daily',
   cache: 'cache',
+  grammar: 'grammar',
+  exams: 'exams',
 } as const;
 
 let dbPromise: Promise<IDBDatabase> | null = null;
@@ -26,6 +28,8 @@ export function openDb(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE.settings)) db.createObjectStore(STORE.settings);
       if (!db.objectStoreNames.contains(STORE.daily)) db.createObjectStore(STORE.daily, { keyPath: 'date' });
       if (!db.objectStoreNames.contains(STORE.cache)) db.createObjectStore(STORE.cache);
+      if (!db.objectStoreNames.contains(STORE.grammar)) db.createObjectStore(STORE.grammar, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(STORE.exams)) db.createObjectStore(STORE.exams, { keyPath: 'id' });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);

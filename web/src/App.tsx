@@ -2,15 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Level, Settings, WordProgress } from './core/types';
 import { DEFAULT_SETTINGS } from './core/types';
 import { buildDrillPlan, buildPlan, type Plan } from './core/scheduler';
+import type { GrammarProgress } from './core/grammar';
 import { loadLevels, type LevelBundle } from './data/loader';
 import {
   bumpDaily,
   exportAll,
   importAll,
   loadDaily,
+  loadGrammarProgress,
   loadProgress,
   loadSettings,
   resetAll,
+  saveGrammarProgress,
   saveProgress,
   saveSettings,
   type DailyRecord,
@@ -23,20 +26,35 @@ import {
   useKeyboardVisibility,
 } from './platform/native';
 import { Home } from './pages/Home';
-import { IconBook, IconChart, IconHome, IconSliders } from './components/icons';
+import { IconBook, IconChart, IconExam, IconHome, IconPen, IconSliders } from './components/icons';
 import { BrandLockup, LogoMark } from './components/Brand';
 import { Study, type StudySummary } from './pages/Study';
 import { Wordbook } from './pages/Wordbook';
+import { Grammar } from './pages/Grammar';
+import { Exam } from './pages/Exam';
 import { Stats } from './pages/Stats';
 import { Settings as SettingsPage } from './pages/Settings';
 import { Onboarding } from './pages/Onboarding';
 
-type Route = 'home' | 'study' | 'book' | 'stats' | 'settings';
+type Route = 'home' | 'study' | 'book' | 'grammar' | 'exam' | 'stats' | 'settings';
 
-const NAV: { key: Route; Icon: (p: { size?: number }) => JSX.Element; label: string }[] = [
+type NavItem = { key: Route; Icon: (p: { size?: number }) => JSX.Element; label: string };
+
+const NAV_DESKTOP: NavItem[] = [
   { key: 'home', Icon: IconHome, label: '今日' },
   { key: 'book', Icon: IconBook, label: '词库' },
+  { key: 'grammar', Icon: IconPen, label: '语法' },
+  { key: 'exam', Icon: IconExam, label: '模考' },
   { key: 'stats', Icon: IconChart, label: '统计' },
+  { key: 'settings', Icon: IconSliders, label: '设置' },
+];
+
+/** 手机底部只放最常用的五项，统计从首页入口进入，避免小屏拥挤 */
+const NAV_MOBILE: NavItem[] = [
+  { key: 'home', Icon: IconHome, label: '今日' },
+  { key: 'book', Icon: IconBook, label: '词库' },
+  { key: 'grammar', Icon: IconPen, label: '语法' },
+  { key: 'exam', Icon: IconExam, label: '模考' },
   { key: 'settings', Icon: IconSliders, label: '设置' },
 ];
 
@@ -46,6 +64,7 @@ export default function App() {
   const [settings, setSettingsState] = useState<Settings>(DEFAULT_SETTINGS);
   const [bundle, setBundle] = useState<LevelBundle | null>(null);
   const [progress, setProgress] = useState<Map<string, WordProgress>>(new Map());
+  const [grammarProgress, setGrammarProgress] = useState<Map<string, GrammarProgress>>(new Map());
   const [daily, setDaily] = useState<Map<string, DailyRecord>>(new Map());
   const [now, setNow] = useState(() => Date.now());
   const [toast, setToast] = useState<string | null>(null);
@@ -56,6 +75,7 @@ export default function App() {
   const [err, setErr] = useState<string | null>(null);
   const [speechWarnClosed, setSpeechWarnClosed] = useState(false);
   const toastTimer = useRef<number | undefined>(undefined);
+  const examRunningRef = useRef(false);
 
   const { speak, status: speechStatus, error: speechError } = useSpeech(settings.speechRate);
 
@@ -78,9 +98,15 @@ export default function App() {
   /* ------------------------------------------------ 初始化 */
   useEffect(() => {
     (async () => {
-      const [s, p, d] = await Promise.all([loadSettings(), loadProgress(), loadDaily()]);
+      const [s, p, gp, d] = await Promise.all([
+        loadSettings(),
+        loadProgress(),
+        loadGrammarProgress(),
+        loadDaily(),
+      ]);
       setSettingsState(s);
       setProgress(p);
+      setGrammarProgress(gp);
       setDaily(d);
       setReady(true);
     })();
@@ -106,6 +132,11 @@ export default function App() {
 
   /* ------------------------------------------------ 原生端：返回键 / 前后台 / 键盘 */
   useAndroidBackButton(() => {
+    if (route === 'exam') {
+      if (examRunningRef.current) window.dispatchEvent(new Event('kotoba:exam-back'));
+      else setRoute('home');
+      return true;
+    }
     if (route !== 'home') {
       setRoute('home');
       return true;
@@ -161,6 +192,20 @@ export default function App() {
     });
     void saveProgress(items);
   }, []);
+
+  const updateGrammarProgress = useCallback((items: GrammarProgress[]) => {
+    setGrammarProgress((prev) => {
+      const m = new Map(prev);
+      for (const it of items) m.set(it.id, it);
+      return m;
+    });
+    void saveGrammarProgress(items);
+  }, []);
+
+  const grammarMastered = useMemo(
+    () => [...grammarProgress.values()].filter((g) => !!g.masteredAt).length,
+    [grammarProgress],
+  );
 
   /**
    * 个人释义覆盖：把用户改过的释义合并进词对象，练习、词库、结算都立即生效。
@@ -244,9 +289,15 @@ export default function App() {
       try {
         const text = await file.text();
         await importAll(JSON.parse(text));
-        const [s, p, d] = await Promise.all([loadSettings(), loadProgress(), loadDaily()]);
+        const [s, p, gp, d] = await Promise.all([
+          loadSettings(),
+          loadProgress(),
+          loadGrammarProgress(),
+          loadDaily(),
+        ]);
         setSettingsState(s);
         setProgress(p);
+        setGrammarProgress(gp);
         setDaily(d);
         showToast('导入成功');
       } catch (e) {
@@ -260,6 +311,7 @@ export default function App() {
     if (!window.confirm('确定清空全部学习进度？该操作不可撤销，建议先导出备份。')) return;
     await resetAll();
     setProgress(new Map());
+    setGrammarProgress(new Map());
     setDaily(new Map());
     showToast('已清空学习进度');
   }, [showToast]);
@@ -356,7 +408,7 @@ export default function App() {
           </div>
         </div>
         <nav className="sidenav">
-          {NAV.map((n) => (
+          {NAV_DESKTOP.map((n) => (
             <button
               key={n.key}
               className={`sidebtn${route === n.key ? ' active' : ''}`}
@@ -429,6 +481,9 @@ export default function App() {
               }}
               onDrillLeech={startLeechDrill}
               onBackup={onExport}
+              grammarMastered={grammarMastered}
+              onGoGrammar={() => go('grammar')}
+              onGoExam={() => go('exam')}
               onSetNewPerDay={(n) => {
                 setSettings({ ...settings, newPerDay: n });
                 showToast(n === 0 ? '已暂停新词，可在设置中恢复' : `每日新词已调整为 ${n}`);
@@ -472,6 +527,25 @@ export default function App() {
             />
           )}
 
+          {route === 'grammar' && (
+            <Grammar
+              settings={settings}
+              progress={grammarProgress}
+              updateProgress={updateGrammarProgress}
+              speak={speak}
+              onToast={showToast}
+            />
+          )}
+
+          {route === 'exam' && (
+            <Exam
+              settings={settings}
+              onToast={showToast}
+              onBack={() => setRoute('home')}
+              runningRef={examRunningRef}
+            />
+          )}
+
           {route === 'stats' && effectiveBundle && (
             <Stats words={effectiveBundle.words} progress={progress} daily={daily} settings={settings} now={now} />
           )}
@@ -491,9 +565,9 @@ export default function App() {
         </main>
       </div>
 
-      {route !== 'study' && (
+      {route !== 'study' && route !== 'exam' && (
         <nav className="bottomnav">
-          {NAV.map((n) => (
+          {NAV_MOBILE.map((n) => (
             <button
               key={n.key}
               className={`navbtn${route === n.key ? ' active' : ''}`}

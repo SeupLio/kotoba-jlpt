@@ -136,3 +136,22 @@ export const IconSearch = (p: IconProps) => (
     <path d="M15.4 15.4 20 20" />
   </Base>
 );
+
+/** 语法：笔 */
+export const IconPen = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4.2 19.8 5.5 15.4 16.1 4.8a2 2 0 0 1 2.8 0l.3.3a2 2 0 0 1 0 2.8L8.6 18.5 4.2 19.8Z" />
+    <path d="M14.6 6.4l3 3" />
+    <path d="M4.2 19.8 8.6 18.5" />
+  </Base>
+);
+
+/** 模考：带时钟的试卷 */
+export const IconExam = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M9 4.5H7.2A1.7 1.7 0 0 0 5.5 6.2v13.1a1.7 1.7 0 0 0 1.7 1.7h9.6a1.7 1.7 0 0 0 1.7-1.7V6.2a1.7 1.7 0 0 0-1.7-1.7H15" />
+    <rect x="9" y="3" width="6" height="3.2" rx="1" />
+    <circle cx="12" cy="13" r="3.6" />
+    <path d="M12 11.3V13l1.2.8" />
+  </Base>
+);
